@@ -1,0 +1,25 @@
+.type-Approved {
+    color: purple;
+    text-decoration: underline;
+}
+.type-In\ Progress {
+    color: orange;
+}
+.type-Tested\ Successfully {
+    color: green;
+}
+.sapMAvatar {
+    background-color: #b6e6b6;
+    color: #006400;
+}
+
+.sapUiTable .sapUiTableRowHdr,
+.sapUiTable .sapUiTableColHdr {
+    border-color: #e0e0e0;
+}
+
+.sprint-bar {
+    background-color: #0070f2;
+    height: 100%;
+    display: block;
+}

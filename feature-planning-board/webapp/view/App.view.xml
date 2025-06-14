@@ -1,0 +1,6 @@
+<mvc:View
+    controllerName="feature.planning.board.controller.App"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.f">
+    <FlexibleColumnLayout id="flexibleColumnLayout" />
+</mvc:View>
