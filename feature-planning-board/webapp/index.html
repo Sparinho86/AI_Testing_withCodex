@@ -4,16 +4,20 @@
     <meta charset="UTF-8">
     <title>Feature Planning Board</title>
     <script
-       id="sap-ui-bootstrap"
-       src="https://ui5.sap.com/resources/sap-ui-core.js"
-       data-sap-ui-theme="sap_fiori_3"
-       data-sap-ui-onInit="module:sap/ui/core/ComponentSupport"
-       data-sap-ui-resourceroots='{"feature.planning.board": "./"}'
-       data-sap-ui-libs="sap.m,sap.f,sap.ui.table">
+        id="sap-ui-bootstrap"
+        src="https://sdk.openui5.org/resources/sap-ui-core.js"
+        data-sap-ui-theme="sap_horizon"
+        data-sap-ui-libs="sap.m, sap.f, sap.ui.table, sap.ui.core, sap.ui.layout"
+        data-sap-ui-compatVersion="edge"
+        data-sap-ui-async="true"
+        data-sap-ui-onInit="module:sap/ui/core/ComponentSupport"
+        data-sap-ui-resourceroots='{
+            "my.sapui5.featureboard": "./"
+        }'>
     </script>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="sapUiBody sapUiSizeCompact">
-    <div data-sap-ui-component data-name="feature.planning.board" data-id="container"></div>
+<body class="sapUiBody" id="content">
+    <div data-sap-ui-component data-name="my.sapui5.featureboard" data-id="container" data-settings='{"id" : "my.sapui5.featureboard"}'></div>
 </body>
 </html>

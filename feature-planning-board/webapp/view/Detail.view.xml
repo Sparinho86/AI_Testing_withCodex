@@ -7,7 +7,7 @@
     <f:DynamicPage id="detailPage" headerTitleVisible="false" preserveHeaderStateOnScroll="true">
         <f:content>
             <SimpleForm id="detailForm" editable="true" width="auto" layout="ResponsiveGridLayout">
-                <Label text="Title"/><Input value="{title}"/>
+                <Label text="Title"/><Input id="titleInput" value="{title}" required="true"/>
                 <Label text="Type"/><Select selectedKey="{type}">
                     <items>
                         <core:Item key="Approved" text="Approved" />
@@ -15,7 +15,7 @@
                         <core:Item key="Tested Successfully" text="Tested Successfully" />
                     </items>
                 </Select>
-                <Label text="Effort"/><StepInput value="{effort}" step="1"/>
+                <Label text="Effort"/><StepInput id="effortInput" value="{effort}" step="1"/>
                 <Label text="Value"/><StepInput value="{value}" step="1" max="5"/>
                 <Label text="Dependencies"/><Input value="{dependencies}"/>
                 <Label text="Owner"/><Input value="{owner}"/>

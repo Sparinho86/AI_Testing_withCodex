@@ -8,22 +8,35 @@ sap.ui.define([
     metadata: {
       manifest: "json"
     },
-    init: function() {
+    init: async function() {
       UIComponent.prototype.init.apply(this, arguments);
 
+      sap.ui.core.BusyIndicator.show(0);
       var sData = window.localStorage.getItem("planningData");
-      var oData;
+      var oData = null;
       if (sData) {
-        oData = JSON.parse(sData);
-      } else {
-        var oResult = jQuery.sap.syncGetJSON("model/planningData.json");
-        oData = oResult.data;
-        window.localStorage.setItem("planningData", JSON.stringify(oData));
+        try {
+          oData = JSON.parse(sData);
+        } catch (e) {
+          console.error("Failed to parse planning data", e);
+        }
+      }
+
+      if (!oData) {
+        try {
+          oData = await new Promise(function(resolve, reject){
+            jQuery.getJSON("model/planningData.json").done(resolve).fail(reject);
+          });
+          window.localStorage.setItem("planningData", JSON.stringify(oData));
+        } catch (err) {
+          oData = {};
+        }
       }
       var oModel = new JSONModel(oData);
       this.setModel(oModel);
 
       this.getRouter().initialize();
+      sap.ui.core.BusyIndicator.hide();
     }
   });
 });
