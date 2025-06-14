@@ -69,10 +69,87 @@ sap.ui.define([
       this.getOwnerComponent().getRouter().navTo("detail", {path: btoa(sPath)});
     },
 
-    onSprintAssignmentChange: function(oEvent, sSprint){
+    onSprintAssignmentChange: async function(oEvent, sSprint){
       var oContext = oEvent.getSource().getBindingContext();
       oContext.getModel().setProperty(oContext.getPath() + "/sprintAssignment", sSprint);
+      sap.ui.core.BusyIndicator.show(0);
+      await Promise.resolve();
       window.localStorage.setItem("planningData", JSON.stringify(oContext.getModel().getData()));
+      sap.ui.core.BusyIndicator.hide();
+    },
+
+    onRowMenuPress: function(oEvent){
+      var oButton = oEvent.getSource();
+      var oContext = oButton.getBindingContext();
+      var sType = oContext.getProperty("type");
+      var aItems = [
+        new sap.m.MenuItem({
+          text: "Add Feature",
+          visible: sType === "Component",
+          press: this._addItem.bind(this, oContext, "Feature")
+        }),
+        new sap.m.MenuItem({
+          text: "Add Work Item",
+          visible: sType === "Feature",
+          press: this._addItem.bind(this, oContext, "Work Item")
+        }),
+        new sap.m.MenuItem({
+          text: "Delete",
+          press: this._deleteItem.bind(this, oContext)
+        })
+      ];
+      var oMenu = new sap.m.Menu({items: aItems});
+      oMenu.openBy(oButton);
+    },
+
+    _addItem: async function(oContext, sType){
+      sap.ui.core.BusyIndicator.show(0);
+      var oModel = oContext.getModel();
+      var oParent = oContext.getObject();
+      if(!oParent.children){
+        oModel.setProperty(oContext.getPath()+"/children", []);
+        oParent.children = [];
+      }
+      oParent.children.push({
+        id: Date.now().toString(),
+        title: "New " + sType,
+        type: "Approved",
+        effort: 0,
+        value: 0,
+        sprintAssignment: null,
+        dependencies: "",
+        owner: "",
+        children: []
+      });
+      oModel.refresh();
+      await Promise.resolve();
+      window.localStorage.setItem("planningData", JSON.stringify(oModel.getData()));
+      sap.ui.core.BusyIndicator.hide();
+    },
+
+    _deleteItem: async function(oContext){
+      sap.ui.core.BusyIndicator.show(0);
+      var oModel = oContext.getModel();
+      var sPath = oContext.getPath();
+      var aParts = sPath.split("/").slice(2); // remove leading /hierarchy
+      this._remove(aParts, oModel.getProperty("/hierarchy"));
+      oModel.refresh();
+      await Promise.resolve();
+      window.localStorage.setItem("planningData", JSON.stringify(oModel.getData()));
+      sap.ui.core.BusyIndicator.hide();
+    },
+
+    _remove: function(aParts, aNodes){
+      var id = aParts.shift();
+      for(var i=0;i<aNodes.length;i++){
+        if(aNodes[i].id === id){
+          if(aParts.length === 0){
+            aNodes.splice(i,1); return true;
+          }
+          return this._remove(aParts, aNodes[i].children || []);
+        }
+      }
+      return false;
     },
 
     onSearch: function(oEvent){
