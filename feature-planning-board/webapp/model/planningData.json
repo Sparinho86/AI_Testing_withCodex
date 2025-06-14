@@ -1,0 +1,56 @@
+{
+  "timeline": {
+    "releases": [
+      {
+        "title": "Release 1",
+        "waves": [
+          {
+            "title": "WAVE 1",
+            "sprints": ["Sprint 1", "Sprint 2", "Sprint 3"]
+          },
+          {
+            "title": "WAVE 2",
+            "sprints": ["Sprint 4", "Sprint 5", "Sprint 6"]
+          }
+        ]
+      }
+    ]
+  },
+  "hierarchy": [
+    {
+      "id": "COMP1",
+      "title": "Requirement Tugger Train (Component)",
+      "type": "Approved",
+      "effort": 53,
+      "value": 4,
+      "sprintAssignment": null,
+      "dependencies": "",
+      "owner": "ST",
+      "children": [
+        {
+          "id": "FEAT1",
+          "title": "WP Manual Staging (Feature)",
+          "type": "Tested Successfully",
+          "effort": 20,
+          "value": 5,
+          "sprintAssignment": "Sprint 1",
+          "dependencies": "",
+          "owner": "ST",
+          "children": [
+            {
+              "id": "WI1",
+              "title": "WI Manual Staging 1 (Subfeature)",
+              "type": "Tested Successfully",
+              "effort": 13,
+              "value": 3,
+              "sprintAssignment": "Sprint 2",
+              "dependencies": "",
+              "owner": "ST",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

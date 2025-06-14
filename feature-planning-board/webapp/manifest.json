@@ -1,0 +1,47 @@
+{
+  "sap.app": {
+    "id": "feature.planning.board",
+    "type": "application",
+    "title": "Feature Planning Board",
+    "applicationVersion": {
+      "version": "1.0.0"
+    }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "feature.planning.board.view.App",
+      "type": "XML"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120",
+      "libs": {
+        "sap.m": {},
+        "sap.f": {},
+        "sap.ui.table": {}
+      }
+    },
+    "models": {
+      "": {
+        "type": "sap.ui.model.json.JSONModel"
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "feature.planning.board.view",
+        "controlId": "flexibleColumnLayout",
+        "controlAggregation": "beginColumnPages",
+        "async": true
+      },
+      "routes": [
+        {"pattern": "", "name": "master", "target": ["master"]},
+        {"pattern": "detail/{path}", "name": "detail", "target": ["master","detail"]}
+      ],
+      "targets": {
+        "master": {"viewName": "Master", "controlAggregation": "beginColumnPages"},
+        "detail": {"viewName": "Detail", "controlAggregation": "midColumnPages"}
+      }
+    }
+  }
+}

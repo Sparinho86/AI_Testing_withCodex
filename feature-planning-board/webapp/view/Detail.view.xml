@@ -1,0 +1,30 @@
+<mvc:View
+    controllerName="feature.planning.board.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:f="sap.f"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <f:DynamicPage id="detailPage" headerTitleVisible="false" preserveHeaderStateOnScroll="true">
+        <f:content>
+            <SimpleForm id="detailForm" editable="true" width="auto" layout="ResponsiveGridLayout">
+                <Label text="Title"/><Input value="{title}"/>
+                <Label text="Type"/><Select selectedKey="{type}">
+                    <items>
+                        <core:Item key="Approved" text="Approved" />
+                        <core:Item key="In Progress" text="In Progress" />
+                        <core:Item key="Tested Successfully" text="Tested Successfully" />
+                    </items>
+                </Select>
+                <Label text="Effort"/><StepInput value="{effort}" step="1"/>
+                <Label text="Value"/><StepInput value="{value}" step="1" max="5"/>
+                <Label text="Dependencies"/><Input value="{dependencies}"/>
+                <Label text="Owner"/><Input value="{owner}"/>
+            </SimpleForm>
+            <Toolbar design="Transparent">
+                <ToolbarSpacer/>
+                <Button text="Save" type="Emphasized" press="onSave"/>
+                <Button text="Delete" type="Negative" press="onDelete"/>
+            </Toolbar>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

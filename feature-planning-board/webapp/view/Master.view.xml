@@ -1,0 +1,63 @@
+<mvc:View
+    controllerName="feature.planning.board.controller.Master"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.ui.table"
+    xmlns:m="sap.m"
+    xmlns:core="sap.ui.core">
+    <m:Page id="masterPage">
+        <m:headerToolbar>
+            <m:Toolbar>
+                <m:Title text="Feature planning (sample)" level="H2" />
+                <m:ToolbarSpacer />
+                <m:SegmentedButton>
+                    <m:Button text="BY HIERARCHY" pressed="true" />
+                </m:SegmentedButton>
+                <m:Button text="FILTER" press="onFilterPress" />
+                <m:SearchField width="15rem" liveChange="onSearch" />
+            </m:Toolbar>
+        </m:headerToolbar>
+        <m:content>
+            <TreeTable id="treeTable" rows="{/hierarchy}" selectionMode="Single" rowSelectionChange="onItemPress">
+                <columns>
+                    <Column>
+                        <multiLabels>
+                            <m:Label text="Title" />
+                        </multiLabels>
+                        <template>
+                            <m:HBox>
+                                <core:Icon src="sap-icon://circle-task" color="{path:'type', formatter:'.typeColorFormatter'}" />
+                                <m:VBox class="sapUiSmallMarginBegin">
+                                    <m:Text text="{title}" />
+                                    <m:Text text="{type}" design="Description" />
+                                </m:VBox>
+                            </m:HBox>
+                        </template>
+                    </Column>
+                    <Column>
+                        <multiLabels><m:Label text="Type" /></multiLabels>
+                        <template>
+                            <m:ObjectStatus text="{type}" state="{path:'type',formatter:'.stateFormatter'}" />
+                        </template>
+                    </Column>
+                    <Column>
+                        <multiLabels><m:Label text="Effort" /></multiLabels>
+                        <template><m:Text text="{effort}" /></template>
+                    </Column>
+                    <Column>
+                        <multiLabels><m:Label text="Value" /></multiLabels>
+                        <template><m:RatingIndicator value="{value}" maxValue="5" enabled="false" /></template>
+                    </Column>
+                    <Column>
+                        <multiLabels><m:Label text="Dependencies" /></multiLabels>
+                        <template><m:Text text="{dependencies}" /></template>
+                    </Column>
+                    <Column>
+                        <multiLabels><m:Label text="Owner" /></multiLabels>
+                        <template><m:Avatar initials="{path:'owner', formatter:'.ownerInitials'}" backgroundColor="Accent5" />
+                        </template>
+                    </Column>
+                </columns>
+            </TreeTable>
+        </m:content>
+    </m:Page>
+</mvc:View>
