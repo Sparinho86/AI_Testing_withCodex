@@ -5,7 +5,7 @@
     xmlns:m="sap.m"
     xmlns:core="sap.ui.core">
     <m:Page id="masterPage">
-        <m:headerToolbar>
+        <headerToolbar>
             <m:Toolbar>
                 <m:Title text="Feature planning (sample)" level="H2" />
                 <m:ToolbarSpacer />
@@ -15,7 +15,7 @@
                 <m:Button text="FILTER" press="onFilterPress" tooltip="Filter" />
                 <m:SearchField width="15rem" liveChange="onSearch" />
             </m:Toolbar>
-        </m:headerToolbar>
+        </headerToolbar>
         <m:content>
             <TreeTable id="treeTable" rows="{/hierarchy}" selectionMode="Single" rowSelectionChange="onItemPress">
                 <columns>

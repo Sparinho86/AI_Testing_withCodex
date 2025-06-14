@@ -11,7 +11,7 @@ sap.ui.define([
       var sPath = atob(oEvent.getParameter("arguments").path);
       this.getView().bindElement("/" + sPath);
     },
-    onSave: async function(){
+    onSave: function(){
       var oModel = this.getView().getModel();
       var oTitleInput = this.byId("titleInput");
       if (!oTitleInput.getValue()) {
@@ -21,12 +21,11 @@ sap.ui.define([
       }
       oTitleInput.setValueState("None");
       sap.ui.core.BusyIndicator.show(0);
-      await Promise.resolve();
       window.localStorage.setItem("planningData", JSON.stringify(oModel.getData()));
       sap.ui.core.BusyIndicator.hide();
       MessageToast.show("Saved");
     },
-    onDelete: async function(){
+    onDelete: function(){
       var oContext = this.getView().getBindingContext();
       if (!oContext) { return; }
       var oModel = oContext.getModel();
@@ -35,7 +34,6 @@ sap.ui.define([
       sap.ui.core.BusyIndicator.show(0);
       this._remove(aParts, oModel.getProperty("/hierarchy"));
       oModel.refresh();
-      await Promise.resolve();
       window.localStorage.setItem("planningData", JSON.stringify(oModel.getData()));
       sap.ui.core.BusyIndicator.hide();
       this.getOwnerComponent().getRouter().navTo("master");
