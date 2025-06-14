@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>SAP Fiori Project Board</title>
+    <style>
+        /* ----- SAP Fiori inspired styling ----- */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #F5F5F5; /* light grey background */
+            color: #333333;            /* dark text */
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        /* Left pane - hierarchy */
+        .left-pane {
+            width: 40%;
+            border-right: 1px solid #E0E0E0;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .left-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #0070F2; /* SAP blue */
+        }
+        button {
+            background-color: #0070F2;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        /* Hierarchy items */
+        .item-card {
+            background-color: white;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .active-card {
+            border-left: 4px solid #0070F2;
+            background-color: #e8f1fe;
+        }
+        .status-badge {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: white;
+            margin-right: 8px;
+        }
+        .badge-Draft { background-color: #6c757d; }
+        .badge-Planned { background-color: #0070F2; }
+        .badge-In\ Progress { background-color: #ff9800; }
+        .badge-For\ Review { background-color: #673ab7; }
+        .badge-Completed { background-color: #4caf50; }
+        .indent-0 { margin-left: 0; }
+        .indent-1 { margin-left: 20px; }
+        .indent-2 { margin-left: 40px; }
+
+        /* Right pane - detail form */
+        .right-pane {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .detail-card {
+            background-color: white;
+            border: 1px solid #E0E0E0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .detail-card h2 {
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+        }
+        textarea { resize: vertical; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="left-pane">
+        <div class="left-header">
+            <h1>SAP Fiori Project Board</h1>
+            <button id="addRequirement">Neues Requirement</button>
+        </div>
+        <div id="hierarchy"></div>
+    </div>
+    <div class="right-pane">
+        <div id="detail" class="detail-card">Bitte wählen Sie ein Element aus, um die Details zu bearbeiten</div>
+    </div>
+</div>
+
+<script>
+/************** Data Model **************/
+const requirements = [];
+
+function generateId(prefix) {
+    return prefix + '_' + Date.now() + '_' + Math.random().toString(36).substring(2,5);
+}
+
+const statuses = ["Draft", "Planned", "In Progress", "For Review", "Completed"];
+
+let selectedElement = null;
+
+/************** Rendering **************/
+function renderHierarchy() {
+    const container = document.getElementById('hierarchy');
+    container.innerHTML = '';
+    requirements.forEach(req => renderItem(req, container, 0));
+}
+
+function renderItem(item, parentEl, level) {
+    const card = document.createElement('div');
+    card.className = 'item-card indent-' + level + (selectedElement === item ? ' active-card' : '');
+    card.draggable = true;
+    card.dataset.id = item.id;
+    card.dataset.type = item.type;
+
+    card.ondragstart = (e) => {
+        e.dataTransfer.setData('text/plain', item.id);
+    };
+
+    card.ondragover = (e) => {
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const dragged = findElementById(draggedId);
+        if (isValidDrop(dragged, item)) {
+            e.preventDefault();
+            card.style.border = '2px dashed #0070F2';
+        }
+    };
+    card.ondragleave = () => { card.style.border = ''; };
+    card.ondrop = (e) => {
+        e.preventDefault();
+        card.style.border = '';
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const dragged = findElementById(draggedId);
+        if (isValidDrop(dragged, item)) {
+            moveElement(dragged, item);
+            renderHierarchy();
+        }
+    };
+
+    const info = document.createElement('div');
+    const badge = document.createElement('span');
+    badge.className = 'status-badge badge-' + item.status.replace(/ /g, '\\ ');
+    badge.textContent = item.status;
+    info.appendChild(badge);
+    const title = document.createElement('span');
+    title.textContent = item.title;
+    info.appendChild(title);
+
+    const actions = document.createElement('div');
+    if (item.type !== 'Work Item') {
+        const addBtn = document.createElement('button');
+        addBtn.textContent = item.type === 'Requirement' ? 'Arbeitspaket hinzufügen' : 'Work Item hinzufügen';
+        addBtn.onclick = (e) => {
+            e.stopPropagation();
+            createChild(item);
+        };
+        actions.appendChild(addBtn);
+    }
+
+    card.appendChild(info);
+    card.appendChild(actions);
+
+    card.onclick = () => {
+        selectedElement = item;
+        renderHierarchy();
+        renderDetail();
+    };
+
+    parentEl.appendChild(card);
+    (item.children || []).forEach(child => renderItem(child, parentEl, level + 1));
+}
+
+/************** Detail View **************/
+function renderDetail() {
+    const detail = document.getElementById('detail');
+    if (!selectedElement) {
+        detail.innerHTML = 'Bitte wählen Sie ein Element aus, um die Details zu bearbeiten';
+        return;
+    }
+    const el = selectedElement;
+    detail.innerHTML = '';
+
+    const header = document.createElement('h2');
+    header.textContent = el.title;
+    detail.appendChild(header);
+
+    const form = document.createElement('div');
+
+    addInput(form, 'Titel', el.title, val => { el.title = val; renderHierarchy(); header.textContent = val; });
+    addTextarea(form, 'Beschreibung', el.description || '', val => { el.description = val; });
+
+    if (el.type === 'Requirement') {
+        addInput(form, 'Priorität', el.priority || '', val => { el.priority = val; });
+        addInput(form, 'Business Owner', el.businessOwner || '', val => { el.businessOwner = val; });
+        addInput(form, 'SAP Modul', el.sapModule || '', val => { el.sapModule = val; });
+    } else if (el.type === 'Work Package') {
+        addInput(form, 'Verantwortlich', el.responsible || '', val => { el.responsible = val; });
+        addInput(form, 'Startdatum', el.startDate || '', val => { el.startDate = val; }, 'date');
+        addInput(form, 'Enddatum', el.endDate || '', val => { el.endDate = val; }, 'date');
+    } else if (el.type === 'Work Item') {
+        addInput(form, 'Entwickler', el.developer || '', val => { el.developer = val; });
+        addInput(form, 'Aufwand', el.effort || '', val => { el.effort = parseFloat(val); }, 'number');
+    }
+
+    addSelect(form, 'Status', statuses, el.status, val => { el.status = val; renderHierarchy(); });
+
+    const del = document.createElement('button');
+    del.textContent = 'Löschen';
+    del.style.marginTop = '10px';
+    del.onclick = () => {
+        if (confirm('Element wirklich löschen?')) {
+            deleteElement(el);
+            selectedElement = null;
+            renderHierarchy();
+            renderDetail();
+        }
+    };
+    form.appendChild(del);
+
+    detail.appendChild(form);
+}
+
+function addInput(form, labelText, value, onChange, type='text') {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    const input = document.createElement('input');
+    input.type = type;
+    input.value = value;
+    input.oninput = () => onChange(input.value);
+    group.appendChild(label);
+    group.appendChild(input);
+    form.appendChild(group);
+}
+
+function addTextarea(form, labelText, value, onChange) {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    const area = document.createElement('textarea');
+    area.value = value;
+    area.rows = 4;
+    area.oninput = () => onChange(area.value);
+    group.appendChild(label);
+    group.appendChild(area);
+    form.appendChild(group);
+}
+
+function addSelect(form, labelText, options, selected, onChange) {
+    const group = document.createElement('div');
+    group.className = 'form-group';
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    const select = document.createElement('select');
+    options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        if (opt === selected) option.selected = true;
+        select.appendChild(option);
+    });
+    select.onchange = () => onChange(select.value);
+    group.appendChild(label);
+    group.appendChild(select);
+    form.appendChild(group);
+}
+
+/************** CRUD helpers **************/
+function createRequirement(title) {
+    const req = {
+        id: generateId('req'),
+        type: 'Requirement',
+        title,
+        description: '',
+        priority: '',
+        businessOwner: '',
+        sapModule: '',
+        status: 'Draft',
+        children: []
+    };
+    requirements.push(req);
+    selectedElement = req;
+    renderHierarchy();
+    renderDetail();
+}
+
+function createChild(parent) {
+    if (parent.type === 'Requirement') {
+        const title = prompt('Titel des Arbeitspakets eingeben:');
+        if (!title) return;
+        const wp = {
+            id: generateId('wp'),
+            type: 'Work Package',
+            title,
+            description: '',
+            responsible: '',
+            startDate: '',
+            endDate: '',
+            status: 'Draft',
+            children: []
+        };
+        parent.children.push(wp);
+        selectedElement = wp;
+    } else if (parent.type === 'Work Package') {
+        const title = prompt('Titel des Work Items eingeben:');
+        if (!title) return;
+        const wi = {
+            id: generateId('wi'),
+            type: 'Work Item',
+            title,
+            description: '',
+            developer: '',
+            effort: 0,
+            status: 'Draft'
+        };
+        parent.children.push(wi);
+        selectedElement = wi;
+    }
+    renderHierarchy();
+    renderDetail();
+}
+
+function deleteElement(element) {
+    function removeFrom(array, target) {
+        const index = array.indexOf(target);
+        if (index !== -1) array.splice(index, 1);
+    }
+    if (element.type === 'Requirement') {
+        removeFrom(requirements, element);
+    } else {
+        const parent = findParent(requirements, element);
+        if (parent) removeFrom(parent.children, element);
+    }
+}
+
+function findParent(list, child) {
+    for (const el of list) {
+        if (el.children && el.children.includes(child)) return el;
+        const p = findParent(el.children || [], child);
+        if (p) return p;
+    }
+    return null;
+}
+
+function findElementById(id, list = requirements) {
+    for (const el of list) {
+        if (el.id === id) return el;
+        if (el.children) {
+            const res = findElementById(id, el.children);
+            if (res) return res;
+        }
+    }
+    return null;
+}
+
+/************** Drag and Drop **************/
+function isValidDrop(dragged, target) {
+    if (!dragged || !target) return false;
+    if (dragged === target || isDescendant(dragged, target)) return false;
+    if (dragged.type === 'Requirement') {
+        return target.type === 'Requirement';
+    }
+    if (dragged.type === 'Work Package') {
+        return target.type === 'Requirement' || target.type === 'Work Package';
+    }
+    if (dragged.type === 'Work Item') {
+        return target.type === 'Work Package' || target.type === 'Work Item';
+    }
+    return false;
+}
+
+function isDescendant(parent, child) {
+    if (!parent.children) return false;
+    for (const c of parent.children) {
+        if (c === child || isDescendant(c, child)) return true;
+    }
+    return false;
+}
+
+function moveElement(element, newParent) {
+    if (element.type === 'Requirement') {
+        const idx = requirements.indexOf(element);
+        if (idx !== -1) requirements.splice(idx,1);
+        const targetIdx = requirements.indexOf(newParent);
+        requirements.splice(targetIdx+1, 0, element);
+    } else {
+        const oldParent = findParent(requirements, element);
+        if (!oldParent) return;
+        const oldIdx = oldParent.children.indexOf(element);
+        oldParent.children.splice(oldIdx,1);
+        if (newParent.type === element.type) {
+            const parentOfNew = findParent(requirements, newParent);
+            const idx = parentOfNew.children.indexOf(newParent);
+            parentOfNew.children.splice(idx+1,0,element);
+        } else {
+            newParent.children.push(element);
+        }
+    }
+}
+
+/************** Event Bindings **************/
+document.getElementById('addRequirement').onclick = () => {
+    const title = prompt('Titel des Requirements eingeben:');
+    if (title) createRequirement(title);
+};
+
+renderHierarchy();
+</script>
+</body>
+</html>
