@@ -69,11 +69,10 @@ sap.ui.define([
       this.getOwnerComponent().getRouter().navTo("detail", {path: btoa(sPath)});
     },
 
-    onSprintAssignmentChange: async function(oEvent, sSprint){
+    onSprintAssignmentChange: function(oEvent, sSprint){
       var oContext = oEvent.getSource().getBindingContext();
       oContext.getModel().setProperty(oContext.getPath() + "/sprintAssignment", sSprint);
       sap.ui.core.BusyIndicator.show(0);
-      await Promise.resolve();
       window.localStorage.setItem("planningData", JSON.stringify(oContext.getModel().getData()));
       sap.ui.core.BusyIndicator.hide();
     },
@@ -102,7 +101,7 @@ sap.ui.define([
       oMenu.openBy(oButton);
     },
 
-    _addItem: async function(oContext, sType){
+    _addItem: function(oContext, sType){
       sap.ui.core.BusyIndicator.show(0);
       var oModel = oContext.getModel();
       var oParent = oContext.getObject();
@@ -122,19 +121,17 @@ sap.ui.define([
         children: []
       });
       oModel.refresh();
-      await Promise.resolve();
       window.localStorage.setItem("planningData", JSON.stringify(oModel.getData()));
       sap.ui.core.BusyIndicator.hide();
     },
 
-    _deleteItem: async function(oContext){
+    _deleteItem: function(oContext){
       sap.ui.core.BusyIndicator.show(0);
       var oModel = oContext.getModel();
       var sPath = oContext.getPath();
       var aParts = sPath.split("/").slice(2); // remove leading /hierarchy
       this._remove(aParts, oModel.getProperty("/hierarchy"));
       oModel.refresh();
-      await Promise.resolve();
       window.localStorage.setItem("planningData", JSON.stringify(oModel.getData()));
       sap.ui.core.BusyIndicator.hide();
     },

@@ -8,9 +8,10 @@ sap.ui.define([
     metadata: {
       manifest: "json"
     },
-    init: async function() {
+    init: function() {
       UIComponent.prototype.init.apply(this, arguments);
 
+      var that = this;
       sap.ui.core.BusyIndicator.show(0);
       var sData = window.localStorage.getItem("planningData");
       var oData = null;
@@ -22,21 +23,25 @@ sap.ui.define([
         }
       }
 
-      if (!oData) {
-        try {
-          oData = await new Promise(function(resolve, reject){
-            jQuery.getJSON("model/planningData.json").done(resolve).fail(reject);
-          });
-          window.localStorage.setItem("planningData", JSON.stringify(oData));
-        } catch (err) {
-          oData = {};
-        }
+      function finalize(data) {
+        var oModel = new JSONModel(data || {});
+        that.setModel(oModel);
+        that.getRouter().initialize();
+        sap.ui.core.BusyIndicator.hide();
       }
-      var oModel = new JSONModel(oData);
-      this.setModel(oModel);
 
-      this.getRouter().initialize();
-      sap.ui.core.BusyIndicator.hide();
+      if (!oData) {
+        jQuery.getJSON("model/planningData.json").done(function(data){
+          oData = data;
+          window.localStorage.setItem("planningData", JSON.stringify(oData));
+          finalize(oData);
+        }).fail(function(err){
+          console.error("Failed to load planningData.json", err);
+          finalize({});
+        });
+      } else {
+        finalize(oData);
+      }
     }
   });
 });
