@@ -5,7 +5,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
     <f:DynamicPage id="detailPage" headerTitleVisible="false" preserveHeaderStateOnScroll="true">
-        <f:content>
+        <content>
             <SimpleForm id="detailForm" editable="true" width="auto" layout="ResponsiveGridLayout">
                 <Label text="Title"/><Input id="titleInput" value="{title}" required="true"/>
                 <Label text="Type"/><Select selectedKey="{type}">
@@ -25,6 +25,6 @@
                 <Button text="Save" type="Emphasized" press="onSave"/>
                 <Button text="Delete" type="Negative" press="onDelete"/>
             </Toolbar>
-        </f:content>
+        </content>
     </f:DynamicPage>
 </mvc:View>
