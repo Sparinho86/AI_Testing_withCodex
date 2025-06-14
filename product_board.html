@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SAP Project Product Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        button {
+            background-color: #3498db;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #board {
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .actions button {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SAP Project Product Board</h1>
+        <button id="addRequirement">Neues Requirement erstellen</button>
+    </header>
+    <div id="board"></div>
+
+    <script>
+        // Utility to create DOM elements with optional classes and inner text
+        const createElement = (tag, className, text) => {
+            const el = document.createElement(tag);
+            if (className) el.className = className;
+            if (text) el.textContent = text;
+            return el;
+        };
+
+        const board = document.getElementById('board');
+        const addRequirementBtn = document.getElementById('addRequirement');
+
+        // Counter IDs to keep things unique
+        let reqId = 0;
+        let pkgId = 0;
+        let itemId = 0;
+
+        // Add a new Requirement card to the board
+        const addRequirement = (name) => {
+            reqId++;
+            const card = createElement('div', 'card requirement');
+            card.dataset.id = reqId;
+            const title = createElement('div');
+            const badge = createElement('span', 'badge', 'Requirement');
+            const span = createElement('span');
+            span.textContent = name;
+            title.appendChild(badge);
+            title.appendChild(span);
+
+            const actions = createElement('div', 'actions');
+            const addPkgBtn = createElement('button');
+            addPkgBtn.textContent = 'Arbeitspaket hinzufügen';
+            addPkgBtn.onclick = () => {
+                const pkgName = prompt('Name des Arbeitspakets eingeben:');
+                if (pkgName) addWorkPackage(card, pkgName);
+            };
+            const delBtn = createElement('button');
+            delBtn.textContent = 'Löschen';
+            delBtn.onclick = () => removeElement(card);
+
+            actions.appendChild(addPkgBtn);
+            actions.appendChild(delBtn);
+
+            card.appendChild(title);
+            card.appendChild(actions);
+            board.appendChild(card);
+        };
+
+        // Add a new Work Package under given requirement card
+        const addWorkPackage = (reqCard, name) => {
+            pkgId++;
+            const card = createElement('div', 'card work-package');
+            card.style.marginLeft = '20px';
+            card.dataset.id = pkgId;
+
+            const title = createElement('div');
+            const badge = createElement('span', 'badge', 'Work Package');
+            const span = createElement('span');
+            span.textContent = name;
+            title.appendChild(badge);
+            title.appendChild(span);
+
+            const actions = createElement('div', 'actions');
+            const addItemBtn = createElement('button');
+            addItemBtn.textContent = 'Work Item hinzufügen';
+            addItemBtn.onclick = () => {
+                const itemName = prompt('Name des Work Items eingeben:');
+                if (itemName) addWorkItem(card, itemName);
+            };
+            const delBtn = createElement('button');
+            delBtn.textContent = 'Löschen';
+            delBtn.onclick = () => removeElement(card);
+
+            actions.appendChild(addItemBtn);
+            actions.appendChild(delBtn);
+
+            card.appendChild(title);
+            card.appendChild(actions);
+
+            reqCard.insertAdjacentElement('afterend', card);
+        };
+
+        // Add a Work Item under given Work Package card
+        const addWorkItem = (pkgCard, name) => {
+            itemId++;
+            const card = createElement('div', 'card work-item');
+            card.style.marginLeft = '40px';
+            card.dataset.id = itemId;
+
+            const title = createElement('div');
+            const badge = createElement('span', 'badge', 'Work Item');
+            const span = createElement('span');
+            span.textContent = name;
+            title.appendChild(badge);
+            title.appendChild(span);
+
+            const actions = createElement('div', 'actions');
+            const delBtn = createElement('button');
+            delBtn.textContent = 'Löschen';
+            delBtn.onclick = () => removeElement(card);
+            actions.appendChild(delBtn);
+
+            card.appendChild(title);
+            card.appendChild(actions);
+
+            pkgCard.insertAdjacentElement('afterend', card);
+        };
+
+        // Remove element and all following child elements based on indentation
+        const removeElement = (element) => {
+            const level = parseInt(element.style.marginLeft) || 0;
+            let next = element.nextElementSibling;
+            while (next && (parseInt(next.style.marginLeft) > level)) {
+                const temp = next.nextElementSibling;
+                next.remove();
+                next = temp;
+            }
+            element.remove();
+        };
+
+        // Bind create requirement button
+        addRequirementBtn.onclick = () => {
+            const name = prompt('Name des Requirements eingeben:');
+            if (name) addRequirement(name);
+        };
+    </script>
+</body>
+</html>
